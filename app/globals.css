@@ -1,0 +1,584 @@
+/*
+  デザイントークン: CLAUDE.md §4準拠
+  - 診断フロー（top/start/quiz/mid）＝ライト（和紙アイボリー×墨紺）
+  - 結果・図鑑 ＝ ダークファンタジー
+  html/body の背景に依存せず、各ページは .page ラッパーに背景を持たせる。
+  全文字色はWCAG AA(4.5:1)以上（scripts/check-contrast.mjsで機械チェック）。
+*/
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  /* 敵対環境（プレビューがbody背景を剥がすケース）対策: 明示的に指定 */
+  background: #f6f3ea;
+}
+
+body {
+  font-family: var(--sans);
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ============ .page 共通 ============ */
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+  position: relative;
+}
+
+.page-light {
+  --bg: #f6f3ea;
+  --card: #fffdf7;
+  --ink: #221f33;
+  --ink-dim: #66627c;
+  --nt: #8a52c8;
+  --nf: #2f9a5e;
+  --sj: #2e6eb0;
+  --sp: #c28a10;
+  --line: rgba(34, 31, 51, .22);
+  --serif: var(--font-serif), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --sans: var(--font-sans), "Hiragino Kaku Gothic ProN", sans-serif;
+
+  background:
+    radial-gradient(ellipse 90% 50% at 50% -12%, rgba(46, 110, 176, .08), transparent 60%),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+}
+
+.page-dark {
+  --bg: #08080d;
+  --card: #14141e;
+  --ink: #f4f3ee;
+  --ink-dim: #cac7d8;
+  --line: rgba(244, 243, 238, .16);
+  --serif: var(--font-serif), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --sans: var(--font-sans), "Hiragino Kaku Gothic ProN", sans-serif;
+  --aura: 127, 208, 152;
+  --accent: #8fdca6;
+
+  justify-content: flex-start;
+  padding-top: 8dvh;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% -10%, rgba(var(--aura), .14), transparent 60%),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+}
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-up { animation: pageIn .7s ease both; }
+
+/* ============ TOP ============ */
+.logo {
+  font-size: clamp(64px, 18vw, 120px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .02em;
+  color: var(--ink);
+}
+.logo sup { font-size: .42em; vertical-align: .62em; color: var(--sj); }
+.tagline {
+  margin-top: 18px;
+  font-size: 16px;
+  letter-spacing: .3em;
+  color: var(--ink-dim);
+  font-weight: 500;
+  font-family: var(--sans);
+}
+.concept {
+  margin-top: 34px;
+  font-size: 17px;
+  line-height: 2.2;
+  letter-spacing: .08em;
+  color: var(--ink);
+}
+.concept em { font-style: normal; color: var(--sj); font-weight: 700; }
+.door-btn {
+  margin-top: 52px;
+  font-family: var(--serif);
+  font-size: 17px;
+  letter-spacing: .42em;
+  text-indent: .42em;
+  color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 18px 46px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--ink);
+  transition: transform .2s, box-shadow .2s, background .3s;
+}
+.door-btn:hover, .door-btn:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--ink);
+  background: #fff;
+  outline: none;
+}
+.top-note {
+  margin-top: 26px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink-dim);
+  letter-spacing: .06em;
+}
+.logo.absorb { animation: absorb .8s cubic-bezier(.6, -.1, .9, .4) forwards; }
+@keyframes absorb {
+  40% { transform: rotate(180deg) scale(1.06); opacity: 1; }
+  100% { transform: rotate(720deg) scale(0); opacity: 0; }
+}
+.fade-rest { transition: opacity .5s; }
+.fade-rest.hidden { opacity: 0; }
+
+/* ============ 深層へのポータル演出 ============ */
+/* ボタン位置を起点に、.page-darkと全く同じ処方の背景色を持つ円が広がって覆う→
+   (裏で遷移)→形はそのまま透明度だけでフェードアウトして消える、の3段階。
+   広がる色そのものが次画面の背景と同一なので、覆い切った瞬間から継ぎ目がない。 */
+.portal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% -10%, rgba(var(--paura), .14), transparent 60%),
+    #08080d;
+  clip-path: circle(150% at var(--ox) var(--oy));
+  opacity: 1;
+}
+.portal-overlay[data-phase="closing"] {
+  clip-path: circle(0% at var(--ox) var(--oy));
+  animation: portalClose .78s cubic-bezier(.6, 0, .85, 1) forwards;
+}
+.portal-overlay[data-phase="fading"] {
+  opacity: 0;
+  transition: opacity .42s ease;
+}
+@keyframes portalClose {
+  to { clip-path: circle(150% at var(--ox) var(--oy)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-overlay[data-phase="closing"] { animation-duration: .01ms; }
+  .portal-overlay[data-phase="fading"] { transition-duration: .01ms; }
+}
+
+/* 深層診断ページの文字・ボタンのフェードイン（opacityはfixed配置の子要素にも効く） */
+.deep-quiz-enter { opacity: 0; animation: contentFadeIn .7s ease .1s forwards; }
+@keyframes contentFadeIn { to { opacity: 1; } }
+
+/* ============ 共通パーツ ============ */
+.eyebrow {
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: .4em;
+  text-indent: .4em;
+  color: var(--ink-dim);
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+.h1 { font-size: clamp(22px, 5.4vw, 30px); font-weight: 700; letter-spacing: .14em; line-height: 1.7; }
+.sub { margin-top: 12px; font-size: 15px; line-height: 2; color: var(--ink-dim); letter-spacing: .05em; font-family: var(--sans); }
+
+/* ============ 表層選択 ============ */
+.type-grid {
+  margin-top: 36px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: min(560px, 100%);
+}
+.type-cell {
+  font-family: var(--sans);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  padding: 14px 4px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(34, 31, 51, .08);
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.type-cell b { display: block; font-size: 16px; letter-spacing: .06em; }
+.type-cell span { display: block; font-size: 11px; margin-top: 4px; color: var(--ink-dim); }
+.type-cell.g-nt { border-top: 3px solid var(--nt); }
+.type-cell.g-nf { border-top: 3px solid var(--nf); }
+.type-cell.g-sj { border-top: 3px solid var(--sj); }
+.type-cell.g-sp { border-top: 3px solid var(--sp); }
+.type-cell:hover, .type-cell:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--ink);
+  box-shadow: 0 4px 10px rgba(34, 31, 51, .15);
+  outline: none;
+}
+.alt-link {
+  margin-top: 30px;
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--ink-dim);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 3px;
+  cursor: pointer;
+  letter-spacing: .1em;
+  display: inline-block;
+  text-decoration: none;
+}
+.alt-link:hover { color: var(--ink); border-color: var(--ink); }
+
+/* ============ 設問 ============ */
+/* 質問文の行数で.q-wrapの高さが変わっても、.pageの縦センタリングに巻き込まれて
+   位置がズレないよう、進捗バーはビューポート上部に固定する。 */
+.progress {
+  position: fixed;
+  top: max(28px, 5dvh);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: min(420px, 86vw);
+  height: 5px;
+  background: rgba(34, 31, 51, .12);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.page-dark .progress { background: rgba(244, 243, 238, .14); }
+.progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--sj, #6fade8), var(--nt, #b58ce8)); width: 0; transition: width .45s ease; }
+.page-dark .progress i { background: var(--accent); }
+.q-count {
+  position: fixed;
+  top: calc(max(28px, 5dvh) + 27px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: max-content;
+  font-family: var(--sans);
+  font-size: 13px;
+  letter-spacing: .24em;
+  color: var(--ink-dim);
+}
+.q-text {
+  font-size: clamp(18px, 5vw, 23px);
+  font-weight: 700;
+  line-height: 1.9;
+  letter-spacing: .04em;
+  width: min(520px, 100%);
+  min-height: 5.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.choices { margin-top: 30px; display: flex; flex-direction: column; gap: 12px; width: min(480px, 100%); }
+.choice {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.75;
+  letter-spacing: .02em;
+  text-align: left;
+  color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(34, 31, 51, .08);
+  transition: border-color .2s, box-shadow .2s, transform .15s;
+}
+.choice small { display: block; font-size: 12px; color: var(--ink-dim); letter-spacing: .16em; margin-bottom: 4px; }
+.choice:hover, .choice:focus-visible { border-color: var(--sj); box-shadow: 0 3px 10px rgba(46, 110, 176, .18); transform: translateX(4px); outline: none; }
+.page-dark .choice { box-shadow: 0 2px 8px rgba(0, 0, 0, .35); }
+.page-dark .choice:hover, .page-dark .choice:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 18px rgba(var(--aura), .3);
+}
+.q-wrap {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
+  margin-top: 78px; /* 固定表示の.progress + .q-countぶんの逃げ */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: opacity .28s;
+}
+.q-wrap.swap { opacity: 0; }
+
+/* 深層診断の背景ファンタジー演出（結果画面と同じオーラ+上昇粒子） */
+.quiz-fantasy-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.quiz-fantasy-aura {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: min(560px, 130vw);
+  height: min(560px, 130vw);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--aura), .32) 0%, rgba(var(--aura), .12) 42%, transparent 70%);
+  filter: blur(22px);
+  animation: pulse 4.5s ease-in-out infinite;
+}
+/* 質問画面は縦センタリングせず、固定ヘッダーのすぐ下から一定の間隔で始める
+   （センタリングだと質問文の長さで.q-countとの間隔が変動してしまうため） */
+.page:has(.q-wrap) { justify-content: flex-start; }
+
+/* ============ 中間画面 ============ */
+.mid-type { margin-top: 26px; font-size: clamp(40px, 12vw, 64px); font-weight: 800; letter-spacing: .1em; }
+.mid-nick { margin-top: 6px; font-size: 15px; color: var(--ink-dim); letter-spacing: .3em; font-family: var(--sans); }
+.next-btn {
+  margin-top: 46px;
+  font-family: var(--serif);
+  font-size: 15px;
+  letter-spacing: .34em;
+  text-indent: .34em;
+  color: var(--ink);
+  background: var(--card, transparent);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 15px 40px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--ink);
+  transition: transform .2s, box-shadow .2s;
+}
+.next-btn:hover, .next-btn:focus-visible { transform: translateY(-2px); box-shadow: 0 4px 0 var(--ink); outline: none; }
+
+/* ダーク画面用ボタン（結果・図鑑） */
+.page-dark .next-btn {
+  color: #f4f3ee;
+  background: transparent;
+  border: 1px solid rgba(244, 243, 238, .4);
+  box-shadow: none;
+}
+.page-dark .next-btn:hover, .page-dark .next-btn:focus-visible {
+  transform: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 22px rgba(var(--aura), .3);
+}
+
+/* ============ 結果 ============ */
+.beast-stage {
+  position: relative;
+  width: min(430px, 88vw);
+  height: min(46dvh, 380px);
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.aura {
+  position: absolute;
+  inset: -14%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--aura), .45) 0%, rgba(var(--aura), .18) 42%, transparent 70%);
+  filter: blur(14px);
+  opacity: 0;
+  animation: auraIn 1.4s ease forwards, pulse 4.5s ease-in-out 1.4s infinite;
+}
+@keyframes auraIn { to { opacity: 1; } }
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.06); opacity: .75; } }
+.beast-img {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  filter: drop-shadow(0 18px 40px rgba(var(--aura), .4));
+  animation: beastIn 1.6s ease 1.9s forwards, floatY 6s ease-in-out 3.5s infinite;
+}
+@keyframes beastIn { from { opacity: 0; transform: translateY(26px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+/* 「……見えてきた」→「あなたに宿るもの」の間（ま）。同じ位置に重ねてクロスフェードさせる */
+.r-eyebrow-slot { position: relative; min-height: 34px; }
+.r-loading, .r-eyebrow {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 15px;
+  letter-spacing: .3em;
+  text-indent: .3em;
+}
+.r-loading { opacity: 0; animation: loadingPulse 1.6s ease .3s forwards; }
+@keyframes loadingPulse {
+  0% { opacity: 0; }
+  18% { opacity: .75; }
+  50% { opacity: .35; }
+  82% { opacity: .75; }
+  100% { opacity: 0; }
+}
+.r-eyebrow { opacity: 0; animation: revealCentered 1s ease 1.9s forwards; }
+/* .r-eyebrowは横中央寄せのtranslateX(-50%)を常に保ったまま縦フェードさせる必要があるため、
+   共通の.revealキーフレーム（transform: translateY→noneで上書きしてしまう）は使わない */
+@keyframes revealCentered {
+  from { opacity: 0; transform: translateX(-50%) translateY(14px); }
+  to { opacity: 1; transform: translateX(-50%); }
+}
+
+/* コードのスロット確定→クライマックスの一拍を置いて二つ名 */
+.r-codes { margin-top: 26px; font-family: var(--sans); font-size: 15px; letter-spacing: .3em; text-indent: .3em; color: #c9c6d6; opacity: 0; animation: reveal .8s ease 3.5s forwards; }
+.r-title {
+  margin-top: 10px;
+  font-size: clamp(24px, 6.4vw, 34px);
+  font-weight: 800;
+  letter-spacing: .1em;
+  line-height: 1.6;
+  color: #fff;
+  opacity: 0;
+  animation: titleReveal 1s cubic-bezier(.2, .7, .3, 1.4) 4.9s forwards;
+}
+.r-title .beast-name { color: var(--accent); }
+@keyframes titleReveal {
+  from { opacity: 0; transform: translateY(14px) scale(.92); filter: brightness(1.8); }
+  60% { opacity: 1; transform: translateY(0) scale(1.03); filter: brightness(1.3); }
+  to { opacity: 1; transform: none; filter: brightness(1); }
+}
+.r-deep { margin-top: 10px; font-family: var(--sans); font-size: 14px; letter-spacing: .18em; color: #c9c6d6; opacity: 0; animation: reveal 1s ease 5.2s forwards; }
+.r-catch { opacity: 0; animation: reveal 1s ease 5.4s forwards; }
+@keyframes reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.gauges { margin-top: 36px; width: min(460px, 100%); display: flex; flex-direction: column; gap: 16px; font-family: var(--sans); opacity: 0; animation: reveal 1s ease 5.5s forwards; }
+.gauge label { display: flex; justify-content: space-between; font-size: 13px; letter-spacing: .1em; color: #f4f3ee; margin-bottom: 6px; }
+.gauge .bar { height: 7px; background: rgba(244, 243, 238, .14); border-radius: 3px; overflow: hidden; }
+.gauge .bar i { display: block; height: 100%; width: var(--w, 0%); background: var(--accent); border-radius: 3px; animation: fillBar 1.2s cubic-bezier(.2, .7, .3, 1) 5.7s both; }
+@keyframes fillBar { from { width: 0; } to { width: var(--w, 0%); } }
+.r-actions { margin-top: 44px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; opacity: 0; animation: reveal 1s ease 5.9s forwards; }
+
+/* 粒子 */
+.particle {
+  position: absolute;
+  bottom: 6%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(var(--aura), .95);
+  pointer-events: none;
+  animation: rise linear infinite;
+}
+@keyframes rise {
+  from { transform: translateY(0); opacity: 0; }
+  12% { opacity: .9; }
+  to { transform: translateY(-340px); opacity: 0; }
+}
+
+/* ============ 図鑑 ============ */
+.dex-grid {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: min(560px, 100%);
+}
+@media (min-width: 600px) { .dex-grid { grid-template-columns: repeat(4, 1fr); } }
+.dex-card {
+  width: 100%;
+  appearance: none;
+  background: #101018;
+  border: 1px solid rgba(244, 243, 238, .14);
+  border-radius: 14px;
+  padding: 16px 10px 14px;
+  cursor: pointer;
+  transition: border-color .25s, box-shadow .25s, transform .15s;
+}
+.dex-card:hover, .dex-card:focus-visible { border-color: rgba(var(--aura), .7); box-shadow: 0 0 20px rgba(var(--aura), .22); transform: translateY(-2px); outline: none; }
+.dex-card img { width: 100%; height: 110px; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(var(--aura), .35)); }
+.dex-card b { display: block; margin-top: 10px; font-size: 14px; letter-spacing: .08em; }
+.dex-card span { display: block; margin-top: 3px; font-family: var(--sans); font-size: 11px; letter-spacing: .14em; color: #bcb9c8; }
+.dex-back { margin: 36px 0 20px; }
+
+/* ============ 幻獣解説モーダル ============ */
+.dex-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(4, 4, 8, .78);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: reveal .25s ease both;
+}
+.dex-modal {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: 86dvh;
+  overflow-y: auto;
+  background: #101018;
+  border: 1px solid rgba(var(--aura), .4);
+  border-radius: 20px;
+  padding: 36px 26px 30px;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(var(--aura), .25);
+}
+.dex-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(244, 243, 238, .3);
+  background: transparent;
+  color: #f4f3ee;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.dex-modal-close:hover, .dex-modal-close:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.dex-modal-aura {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--aura), .4) 0%, transparent 70%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+.dex-modal-img { position: relative; width: 160px; height: 160px; object-fit: contain; filter: drop-shadow(0 10px 24px rgba(var(--aura), .4)); }
+.dex-modal-code { position: relative; margin-top: 18px; font-family: var(--sans); font-size: 12px; letter-spacing: .24em; color: #bcb9c8; }
+.dex-modal-name { position: relative; margin-top: 6px; font-size: 24px; font-weight: 800; letter-spacing: .1em; color: var(--accent); }
+.dex-modal-desc { position: relative; margin-top: 16px; font-family: var(--sans); font-size: 14px; line-height: 2; color: #e8e6f0; text-align: left; }
+
+.foot {
+  margin-top: 40px;
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: .2em;
+  color: var(--ink-dim);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

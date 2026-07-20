@@ -1,0 +1,63 @@
+{
+  "groups": {
+    "nt": {
+      "code": "NT",
+      "jp": "分析家",
+      "jp_note": "※16Personalities訳語のため要差し替え（候補検討中：星の族など）",
+      "color_dark": "#9460d0",
+      "color_dark_rgb": "148,96,208",
+      "accent_on_dark": "#b58ce8",
+      "color_light": "#8a52c8"
+    },
+    "nf": {
+      "code": "NF",
+      "jp": "外交官",
+      "jp_note": "※16Personalities訳語のため要差し替え",
+      "color_dark": "#7fd098",
+      "color_dark_rgb": "127,208,152",
+      "accent_on_dark": "#8fdca6",
+      "color_light": "#2f9a5e"
+    },
+    "sj": {
+      "code": "SJ",
+      "jp": "番人",
+      "jp_note": "※16Personalities訳語のため要差し替え",
+      "color_dark": "#3d7fc4",
+      "color_dark_rgb": "61,127,196",
+      "accent_on_dark": "#6fade8",
+      "color_light": "#2e6eb0"
+    },
+    "sp": {
+      "code": "SP",
+      "jp": "探検家",
+      "jp_note": "※16Personalities訳語のため要差し替え",
+      "color_dark": "#f0c04a",
+      "color_dark_rgb": "240,192,74",
+      "accent_on_dark": "#f5cf6e",
+      "color_light": "#c28a10"
+    }
+  },
+  "types": [
+    { "code": "INTJ", "role": "軍師",     "beast": "ヴァンパイア", "group": "nt", "image": "assets/beasts/INTJ.webp" },
+    { "code": "INTP", "role": "賢者",     "beast": "スフィンクス", "group": "nt", "image": "assets/beasts/INTP.webp" },
+    { "code": "ENTJ", "role": "覇者",     "beast": "ドラゴン",     "group": "nt", "image": "assets/beasts/ENTJ.webp" },
+    { "code": "ENTP", "role": "弁士",     "beast": "キマイラ",     "group": "nt", "image": "assets/beasts/ENTP.webp" },
+    { "code": "INFJ", "role": "先見者",   "beast": "エルフ",       "group": "nf", "image": "assets/beasts/INFJ.webp" },
+    { "code": "INFP", "role": "夢想家",   "beast": "ドライアド",   "group": "nf", "image": "assets/beasts/INFP.webp" },
+    { "code": "ENFJ", "role": "指導者",   "beast": "鳳凰",         "group": "nf", "image": "assets/beasts/ENFJ.webp" },
+    { "code": "ENFP", "role": "革命児",   "beast": "九尾の狐",     "group": "nf", "image": "assets/beasts/ENFP.webp" },
+    { "code": "ISTJ", "role": "規律家",   "beast": "ケルベロス",   "group": "sj", "image": "assets/beasts/ISTJ.webp" },
+    { "code": "ISFJ", "role": "守護者",   "beast": "ユニコーン",   "group": "sj", "image": "assets/beasts/ISFJ.webp" },
+    { "code": "ESTJ", "role": "統率者",   "beast": "グリフォン",   "group": "sj", "image": "assets/beasts/ESTJ.webp" },
+    { "code": "ESFJ", "role": "司会者",   "beast": "麒麟",         "group": "sj", "image": "assets/beasts/ESFJ.webp" },
+    { "code": "ISTP", "role": "職人",     "beast": "ケンタウロス", "group": "sp", "image": "assets/beasts/ISTP.webp" },
+    { "code": "ISFP", "role": "ボヘミアン","beast": "ケットシー",   "group": "sp", "image": "assets/beasts/ISFP.webp" },
+    { "code": "ESTP", "role": "勝負師",   "beast": "ワーウルフ",   "group": "sp", "image": "assets/beasts/ESTP.webp" },
+    { "code": "ESFP", "role": "座長",     "beast": "セイレーン",   "group": "sp", "image": "assets/beasts/ESFP.webp" }
+  ],
+  "naming": {
+    "title_format": "{深層.beast}宿せし{表層.role}",
+    "code_format": "{表層.code} - {深層.code}",
+    "example": { "surface": "ESFJ", "deep": "INFP", "title": "ドライアド宿せし司会者", "codes": "ESFJ - INFP" }
+  }
+}
