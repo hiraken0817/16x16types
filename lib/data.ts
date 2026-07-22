@@ -3,11 +3,13 @@ import path from "node:path";
 import typesJson from "@/data/types.json";
 import questionsJson from "@/data/questions.json";
 import beastsJson from "@/content/beasts.json";
+import rolesJson from "@/content/roles.json";
 import type { GroupEntry, QuestionsData, ResultContent, TypeEntry, TypesData } from "./types";
 
 const typesData = typesJson as TypesData;
 const questionsData = questionsJson as QuestionsData;
 const beastDescriptions = beastsJson as Record<string, string>;
+const roleDescriptions = rolesJson as Record<string, string>;
 
 export function getTypesData(): TypesData {
   return typesData;
@@ -31,6 +33,10 @@ export function getQuestionsData(): QuestionsData {
 
 export function getBeastDescription(code: string): string | undefined {
   return beastDescriptions[code.toUpperCase()];
+}
+
+export function getRoleDescription(code: string): string | undefined {
+  return roleDescriptions[code.toUpperCase()];
 }
 
 const CONTENT_DIR = path.join(process.cwd(), "content");

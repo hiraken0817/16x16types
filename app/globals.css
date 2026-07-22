@@ -399,14 +399,32 @@ a {
 }
 @keyframes auraIn { to { opacity: 1; } }
 @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.06); opacity: .75; } }
+/* 幻獣イラスト。表層グループ色を同一要素内でbackground-blend-modeにより
+   直接焼き込む（別要素で重ねるとマスクの位置がズレるため、1要素に統一） */
 .beast-img {
   position: relative;
+  width: 400px;
+  height: 400px;
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;
   opacity: 0;
   filter: drop-shadow(0 18px 40px rgba(var(--aura), .4));
   animation: beastIn 1.6s ease 1.9s forwards, floatY 6s ease-in-out 3.5s infinite;
+
+  background-image: linear-gradient(rgb(var(--surface-tint)), rgb(var(--surface-tint))), var(--beast-src);
+  background-size: contain, contain;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  background-blend-mode: color, normal;
+
+  -webkit-mask-image: var(--beast-src);
+  mask-image: var(--beast-src);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 @keyframes beastIn { from { opacity: 0; transform: translateY(26px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
@@ -458,14 +476,84 @@ a {
   to { opacity: 1; transform: none; filter: brightness(1); }
 }
 .r-deep { margin-top: 10px; font-family: var(--sans); font-size: 14px; letter-spacing: .18em; color: #c9c6d6; opacity: 0; animation: reveal 1s ease 5.2s forwards; }
-.r-catch { opacity: 0; animation: reveal 1s ease 5.4s forwards; }
 @keyframes reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-.gauges { margin-top: 36px; width: min(460px, 100%); display: flex; flex-direction: column; gap: 16px; font-family: var(--sans); opacity: 0; animation: reveal 1s ease 5.5s forwards; }
+.gauges { margin-top: 20px; width: 100%; display: flex; flex-direction: column; gap: 16px; font-family: var(--sans); }
 .gauge label { display: flex; justify-content: space-between; font-size: 13px; letter-spacing: .1em; color: #f4f3ee; margin-bottom: 6px; }
 .gauge .bar { height: 7px; background: rgba(244, 243, 238, .14); border-radius: 3px; overflow: hidden; }
-.gauge .bar i { display: block; height: 100%; width: var(--w, 0%); background: var(--accent); border-radius: 3px; animation: fillBar 1.2s cubic-bezier(.2, .7, .3, 1) 5.7s both; }
+.gauge .bar i { display: block; height: 100%; width: var(--w, 0%); background: var(--accent); border-radius: 3px; animation: fillBar 1.2s cubic-bezier(.2, .7, .3, 1) both; }
 @keyframes fillBar { from { width: 0; } to { width: var(--w, 0%); } }
-.r-actions { margin-top: 44px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; opacity: 0; animation: reveal 1s ease 5.9s forwards; }
+.r-actions { margin-top: 44px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; opacity: 0; animation: reveal 1s ease 5.4s forwards; }
+
+/* ============ 結果ページ・本文セクション（下スクロール領域） ============ */
+.r-main {
+  margin-top: 56px;
+  width: min(560px, 100%);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: reveal 1s ease 5.4s forwards;
+}
+.r-section { margin-top: 48px; text-align: left; }
+.r-section:first-child { margin-top: 0; }
+.r-sec-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: .3em;
+  text-indent: .3em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.r-h2 { font-size: 20px; font-weight: 700; letter-spacing: .08em; margin-bottom: 18px; color: #fff; }
+.r-body { font-family: var(--sans); font-size: 15px; line-height: 2; color: #e8e6f0; margin-top: 14px; }
+.r-body:first-of-type { margin-top: 0; }
+.r-catch-line { font-family: var(--serif); font-size: 17px; font-weight: 700; line-height: 1.8; color: #fff; }
+
+.duo { display: flex; flex-direction: column; gap: 14px; }
+@media (min-width: 600px) { .duo { flex-direction: row; } }
+.duo-card {
+  flex: 1;
+  background: #101018;
+  border: 1px solid rgba(244, 243, 238, .14);
+  border-top: 3px solid rgb(var(--card-aura));
+  border-radius: 14px;
+  padding: 20px 20px 22px;
+}
+.duo-card h3 { font-size: 17px; font-weight: 700; letter-spacing: .06em; }
+.duo-tag { display: block; margin-top: 4px; font-family: var(--sans); font-size: 11px; letter-spacing: .12em; color: #bcb9c8; }
+.duo-card p { margin-top: 12px; font-family: var(--sans); font-size: 14px; line-height: 1.9; color: #d8d6e2; }
+
+.pair { display: flex; flex-direction: column; gap: 14px; }
+.pair-card {
+  background: #101018;
+  border: 1px solid rgba(244, 243, 238, .14);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+.pair-card.pair-light { border-color: rgba(var(--aura), .5); }
+.pair-card h3 { font-size: 14px; font-weight: 700; letter-spacing: .08em; color: var(--accent); }
+.pair-card p { margin-top: 8px; font-family: var(--sans); font-size: 14px; line-height: 1.9; color: #d8d6e2; }
+
+.r-tale p { font-family: var(--serif); font-size: 15.5px; line-height: 2.1; color: #e8e6f0; margin-top: 14px; }
+.r-tale p:first-child { margin-top: 0; }
+.r-tale-fin { margin-top: 18px !important; color: var(--accent) !important; font-weight: 700; }
+
+.r-locked {
+  border: 1px solid rgba(var(--aura), .4);
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(var(--aura), .12), transparent 70%), #0d0d14;
+}
+.r-lock { font-size: 26px; }
+.r-locked h3 { margin-top: 10px; font-size: 16px; font-weight: 700; letter-spacing: .04em; }
+.r-locked ul { margin-top: 16px; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+.r-locked li { font-family: var(--sans); font-size: 13.5px; line-height: 1.7; color: #cac7d8; padding-left: 1.2em; position: relative; }
+.r-locked li::before { content: "・"; position: absolute; left: 0; color: var(--accent); }
+.r-locked-note { margin-top: 18px; font-family: var(--sans); font-size: 12px; letter-spacing: .1em; color: #8886a0; }
+
+.r-sep { margin: 48px 0 0; border: none; border-top: 1px solid rgba(244, 243, 238, .14); }
+.r-share-section { text-align: center; margin-top: 40px; }
+.r-share-quote { font-family: var(--serif); font-size: 15px; line-height: 2; color: #e8e6f0; }
 
 /* 粒子 */
 .particle {
